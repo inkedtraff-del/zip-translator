@@ -55,19 +55,15 @@ function looksLikePathOrCode(s) {
 function isSelectorLike(s) {
   const t = s.trim();
   if (!t) return true;
-  if (/^[.#\[]/.test(t)) return true;          // .btn #id [data-x]
-  if (/[>~+]/.test(t)) return true;            // .a > .b
-  if (/:{1,2}[a-z-]+/i.test(t)) return true;   // :hover ::after
+  if (/^[.#\[]/.test(t)) return true;
+  if (/[>~+]/.test(t)) return true;
+  if (/:{1,2}[a-z-]+/i.test(t)) return true;
   return false;
 }
 
 const SAFE_ATTRS = new Set(["title", "placeholder", "aria-label", "alt", "value"]);
 const SAFE_TEXT_PROPS = new Set(["innerText", "textContent", "title", "placeholder", "value"]);
-
-// keys in objects that are intended to be shown to user
-const SAFE_OBJ_KEYS = new Set([
-  "text", "title", "message", "label", "caption", "placeholder", "subtitle", "headline", "description"
-]);
+const SAFE_OBJ_KEYS = new Set(["text","title","message","label","caption","placeholder","subtitle","headline","description"]);
 
 async function translateBatch(openai, strings, targetLang) {
   if (!strings.length) return [];
@@ -129,7 +125,6 @@ export default async function handler(req, res) {
     function addText(get, set) {
       const v = get();
       if (typeof v !== "string") return;
-
       const norm = normalizeWhitespace(v);
       if (!norm) return;
       if (looksLikePathOrCode(norm)) return;
@@ -140,18 +135,15 @@ export default async function handler(req, res) {
         seen.set(norm, idx);
         texts.push(norm);
       }
-
       items.push({ get, set, idx, original: v });
     }
 
     traverse(ast, {
-      // JSX text nodes: <button>Buy</button>
       JSXText(path) {
         const node = path.node;
         addText(() => node.value, (t) => { node.value = t; });
       },
 
-      // JSX safe attrs: <img alt="...">
       JSXAttribute(path) {
         const node = path.node;
         const name = node.name?.name;
@@ -162,7 +154,6 @@ export default async function handler(req, res) {
         addText(() => val.value, (t) => { val.value = t; });
       },
 
-      // element.textContent = "..."
       AssignmentExpression(path) {
         const node = path.node;
         if (node.operator !== "=") return;
@@ -180,7 +171,6 @@ export default async function handler(req, res) {
         addText(() => right.value, (t) => { right.value = t; });
       },
 
-      // el.setAttribute("title", "...")
       CallExpression(path) {
         const node = path.node;
         const callee = node.callee;
@@ -203,7 +193,6 @@ export default async function handler(req, res) {
         addText(() => a1.value, (t) => { a1.value = t; });
       },
 
-      // ✅ OBJECTS: { text: "..." }, { message: "..." }  (only safe keys)
       ObjectProperty(path) {
         const node = path.node;
         if (!node || node.computed) return;
@@ -214,16 +203,11 @@ export default async function handler(req, res) {
           null;
 
         if (!key || !SAFE_OBJ_KEYS.has(String(key))) return;
-
         if (node.value?.type !== "StringLiteral") return;
 
-        addText(
-          () => node.value.value,
-          (t) => { node.value.value = t; }
-        );
+        addText(() => node.value.value, (t) => { node.value.value = t; });
       },
 
-      // ✅ ARRAYS: ["#selector", "TEXT"]  -> translate only 2nd element
       ArrayExpression(path) {
         const node = path.node;
         const els = node.elements || [];
@@ -232,20 +216,14 @@ export default async function handler(req, res) {
         const a0 = els[0];
         const a1 = els[1];
 
-        // first must be selector-ish string OR null
         const okFirst =
           (a0 && a0.type === "StringLiteral" && isSelectorLike(String(a0.value || ""))) ||
           (a0 && a0.type === "NullLiteral");
 
         if (!okFirst) return;
-
-        // second must be string literal (this is the UI text)
         if (!a1 || a1.type !== "StringLiteral") return;
 
-        addText(
-          () => a1.value,
-          (t) => { a1.value = t; }
-        );
+        addText(() => a1.value, (t) => { a1.value = t; });
       }
     });
 
