@@ -25,9 +25,7 @@ function unwrapGenerator(mod) {
 
 let generate = unwrapGenerator(generatorNS);
 if (typeof generate !== "function") {
-  try {
-    generate = unwrapGenerator(require("@babel/generator"));
-  } catch {}
+  try { generate = unwrapGenerator(require("@babel/generator")); } catch {}
 }
 const GENERATOR_OK = typeof generate === "function";
 
@@ -41,14 +39,11 @@ function looksBinaryText(str) {
   return false;
 }
 
-const SAFE_ATTRS = new Set(["title", "placeholder", "aria-label", "alt", "value"]);
-const SAFE_TEXT_PROPS = new Set(["innerText", "textContent", "placeholder", "title", "value", "ariaLabel"]);
-
-// translate only obvious UI text (not selectors/keys)
 function normalizeWhitespace(s) {
   if (!s || !String(s).trim()) return s;
   return String(s).replace(/\s+/g, " ").trim();
 }
+
 function looksLikePathOrCode(s) {
   const t = s.trim();
   if (!t) return true;
@@ -56,6 +51,23 @@ function looksLikePathOrCode(s) {
   if (/[{}[\];=<>]/.test(t) && t.length < 80) return true;
   return false;
 }
+
+function isSelectorLike(s) {
+  const t = s.trim();
+  if (!t) return true;
+  if (/^[.#\[]/.test(t)) return true;          // .btn #id [data-x]
+  if (/[>~+]/.test(t)) return true;            // .a > .b
+  if (/:{1,2}[a-z-]+/i.test(t)) return true;   // :hover ::after
+  return false;
+}
+
+const SAFE_ATTRS = new Set(["title", "placeholder", "aria-label", "alt", "value"]);
+const SAFE_TEXT_PROPS = new Set(["innerText", "textContent", "title", "placeholder", "value"]);
+
+// keys in objects that are intended to be shown to user
+const SAFE_OBJ_KEYS = new Set([
+  "text", "title", "message", "label", "caption", "placeholder", "subtitle", "headline", "description"
+]);
 
 async function translateBatch(openai, strings, targetLang) {
   if (!strings.length) return [];
@@ -69,12 +81,9 @@ async function translateBatch(openai, strings, targetLang) {
       {
         role: "system",
         content:
-          "Translate ONLY human-visible UI text. DO NOT translate selectors, event names, keys, URLs, code. Return ONLY JSON: {translations:[...]} same length/order."
+          "Translate ONLY human-visible UI text. Do NOT translate selectors, keys, event names, URLs, code. Return ONLY JSON: {translations:[...]} same length/order."
       },
-      {
-        role: "user",
-        content: JSON.stringify({ targetLang, strings })
-      }
+      { role: "user", content: JSON.stringify({ targetLang, strings }) }
     ]
   });
 
@@ -103,10 +112,7 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: "Missing code or targetLang" });
     }
 
-    // never crash on weird/binary “._*” files
     if (looksBinaryText(code)) return res.status(200).json({ code });
-
-    // if generator missing, return unchanged
     if (!GENERATOR_OK) return res.status(200).json({ code });
 
     const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
@@ -116,7 +122,6 @@ export default async function handler(req, res) {
       plugins: ["jsx", "typescript", "classProperties", "dynamicImport", "topLevelAwait"]
     });
 
-    // collect only whitelisted contexts
     const items = [];
     const texts = [];
     const seen = new Map();
@@ -124,6 +129,7 @@ export default async function handler(req, res) {
     function addText(get, set) {
       const v = get();
       if (typeof v !== "string") return;
+
       const norm = normalizeWhitespace(v);
       if (!norm) return;
       if (looksLikePathOrCode(norm)) return;
@@ -134,62 +140,47 @@ export default async function handler(req, res) {
         seen.set(norm, idx);
         texts.push(norm);
       }
+
       items.push({ get, set, idx, original: v });
     }
 
     traverse(ast, {
-      // ✅ JSX text: <button>Click</button>
+      // JSX text nodes: <button>Buy</button>
       JSXText(path) {
         const node = path.node;
-        addText(
-          () => node.value,
-          (t) => {
-            node.value = t;
-          }
-        );
+        addText(() => node.value, (t) => { node.value = t; });
       },
 
-      // ✅ JSX attr: <img alt="..."> <button title="...">
+      // JSX safe attrs: <img alt="...">
       JSXAttribute(path) {
         const node = path.node;
         const name = node.name?.name;
-        const val = node.value;
         if (!name || !SAFE_ATTRS.has(String(name))) return;
+        const val = node.value;
         if (!val || val.type !== "StringLiteral") return;
 
-        addText(
-          () => val.value,
-          (t) => {
-            val.value = t;
-          }
-        );
+        addText(() => val.value, (t) => { val.value = t; });
       },
 
-      // ✅ element.innerText = "..."
+      // element.textContent = "..."
       AssignmentExpression(path) {
         const node = path.node;
         if (node.operator !== "=") return;
 
         const left = node.left;
         const right = node.right;
-
         if (!right || right.type !== "StringLiteral") return;
         if (!left || left.type !== "MemberExpression") return;
         if (left.computed) return;
-        if (!left.property || left.property.type !== "Identifier") return;
+        if (left.property?.type !== "Identifier") return;
 
         const prop = left.property.name;
         if (!SAFE_TEXT_PROPS.has(prop)) return;
 
-        addText(
-          () => right.value,
-          (t) => {
-            right.value = t;
-          }
-        );
+        addText(() => right.value, (t) => { right.value = t; });
       },
 
-      // ✅ el.setAttribute("title", "...")
+      // el.setAttribute("title", "...")
       CallExpression(path) {
         const node = path.node;
         const callee = node.callee;
@@ -197,12 +188,10 @@ export default async function handler(req, res) {
 
         if (!callee || callee.type !== "MemberExpression") return;
         if (callee.computed) return;
-        if (!callee.property || callee.property.type !== "Identifier") return;
+        if (callee.property?.type !== "Identifier") return;
+        if (callee.property.name !== "setAttribute") return;
 
-        const method = callee.property.name;
-        if (method !== "setAttribute") return;
         if (args.length < 2) return;
-
         const a0 = args[0];
         const a1 = args[1];
         if (!a0 || a0.type !== "StringLiteral") return;
@@ -211,11 +200,51 @@ export default async function handler(req, res) {
         const attrName = String(a0.value || "").toLowerCase();
         if (!SAFE_ATTRS.has(attrName)) return;
 
+        addText(() => a1.value, (t) => { a1.value = t; });
+      },
+
+      // ✅ OBJECTS: { text: "..." }, { message: "..." }  (only safe keys)
+      ObjectProperty(path) {
+        const node = path.node;
+        if (!node || node.computed) return;
+
+        const key =
+          node.key?.type === "Identifier" ? node.key.name :
+          node.key?.type === "StringLiteral" ? node.key.value :
+          null;
+
+        if (!key || !SAFE_OBJ_KEYS.has(String(key))) return;
+
+        if (node.value?.type !== "StringLiteral") return;
+
+        addText(
+          () => node.value.value,
+          (t) => { node.value.value = t; }
+        );
+      },
+
+      // ✅ ARRAYS: ["#selector", "TEXT"]  -> translate only 2nd element
+      ArrayExpression(path) {
+        const node = path.node;
+        const els = node.elements || [];
+        if (els.length !== 2) return;
+
+        const a0 = els[0];
+        const a1 = els[1];
+
+        // first must be selector-ish string OR null
+        const okFirst =
+          (a0 && a0.type === "StringLiteral" && isSelectorLike(String(a0.value || ""))) ||
+          (a0 && a0.type === "NullLiteral");
+
+        if (!okFirst) return;
+
+        // second must be string literal (this is the UI text)
+        if (!a1 || a1.type !== "StringLiteral") return;
+
         addText(
           () => a1.value,
-          (t) => {
-            a1.value = t;
-          }
+          (t) => { a1.value = t; }
         );
       }
     });
@@ -223,8 +252,8 @@ export default async function handler(req, res) {
     const translations = await translateBatch(openai, texts, targetLang);
 
     for (const it of items) {
-      const origFull = it.original;
-      const m = String(origFull).match(/^(\s*)([\s\S]*?)(\s*)$/);
+      const origFull = String(it.original ?? "");
+      const m = origFull.match(/^(\s*)([\s\S]*?)(\s*)$/);
       const lead = m?.[1] ?? "";
       const tail = m?.[3] ?? "";
       const t = translations[it.idx] ?? it.get();
