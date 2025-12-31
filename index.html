@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>INKED TRANSLATOR PRO 3000</title>
+  <style>
+    :root{
+      --bg1:#0b1020;
+      --bg2:#141a33;
+      --card: rgba(255,255,255,.07);
+      --stroke: rgba(255,255,255,.14);
+      --text: rgba(255,255,255,.92);
+      --muted: rgba(255,255,255,.68);
+      --accent:#7c5cff;
+      --accent2:#00d4ff;
+    }
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      color:var(--text);
+      background:
+        radial-gradient(1200px 600px at 15% 10%, rgba(124,92,255,.30), transparent 55%),
+        radial-gradient(1000px 600px at 85% 0%, rgba(0,212,255,.22), transparent 55%),
+        linear-gradient(180deg, var(--bg1), var(--bg2));
+      min-height:100vh;
+      padding:44px 18px;
+    }
+    .wrap{ max-width:1020px; margin:0 auto; }
+    .top{ display:flex; justify-content:space-between; align-items:flex-start; gap:16px; flex-wrap:wrap; margin-bottom:18px; }
+    h1{ font-size:28px; margin:0; letter-spacing:.2px; }
+    .sub{ margin-top:8px; color:var(--muted); max-width:760px; line-height:1.45; }
+    .card{
+      background:var(--card);
+      border:1px solid var(--stroke);
+      border-radius:18px;
+      padding:18px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.25);
+      backdrop-filter: blur(10px);
+    }
+    .section-title{ font-size:14px; margin:0 0 10px; color: rgba(255,255,255,.88); }
+    .row{ display:flex; gap:12px; flex-wrap:wrap; }
+    .col{ flex:1; min-width:240px; }
+    label{ display:block; font-size:12px; color:var(--muted); margin:10px 0 6px; }
+    select, input[type="text"]{
+      width:100%;
+      padding:12px 12px;
+      border-radius:12px;
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.14);
+      color:var(--text);
+      outline:none;
+    }
+    select:focus, input[type="text"]:focus{
+      border-color: rgba(124,92,255,.55);
+      box-shadow: 0 0 0 3px rgba(124,92,255,.20);
+    }
+    .hint{ font-size:12px; color:var(--muted); margin-top:6px; line-height:1.35; }
+    .filebox{
+      border:1px dashed rgba(255,255,255,.26);
+      background:rgba(255,255,255,.04);
+      border-radius:14px;
+      padding:14px;
+      display:flex; align-items:center; justify-content:space-between; gap:12px;
+    }
+    .filebox strong{ font-size:13px; }
+    .filebox .name{ color:var(--muted); font-size:12px; margin-top:4px; }
+    .hr{ height:1px; background:rgba(255,255,255,.10); margin:16px 0; }
+    .actions{ display:flex; gap:12px; flex-wrap:wrap; margin-top:14px; align-items:center; }
+    .btn{
+      display:inline-flex; align-items:center; justify-content:center; gap:10px;
+      padding:12px 16px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.16);
+      cursor:pointer;
+      font-weight:800;
+      color:rgba(255,255,255,.92);
+      background: linear-gradient(135deg, rgba(124,92,255,.95), rgba(0,212,255,.70));
+      user-select:none;
+      text-decoration:none;
+    }
+    .btn.secondary{
+      background:rgba(255,255,255,.06);
+      font-weight:700;
+    }
+    .pill{ display:inline-flex; gap:10px; align-items:center; padding:10px 12px; border-radius:14px;
+      background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.12); color:var(--muted); font-size:12px; }
+    .pill input{ width:16px; height:16px; }
+    pre{
+      margin:14px 0 0;
+      padding:12px 12px;
+      border-radius:14px;
+      background:rgba(0,0,0,.25);
+      border:1px solid rgba(255,255,255,.10);
+      color: rgba(255,255,255,.86);
+      overflow:auto;
+      min-height:48px;
+      white-space:pre-wrap;
+    }
+    .grid{ display:grid; grid-template-columns: 1fr; gap:16px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top">
+      <div>
+        <h1>INKED TRANSLATOR PRO 3000</h1>
+        <div class="sub">Загрузи ZIP с проектом, выбери язык и скачай архив с переводом.</div>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="card">
+  <div class="section-title">1) Архив</div>
+  <div class="filebox">
+    <div>
+      <strong>Выбери ZIP</strong>
+      <div class="name" id="zipName">Архив не выбран</div>
+    </div>
+    <input type="file" id="zip" accept=".zip" />
+  </div>
+
+  <div class="hr"></div>
+
+  <div class="section-title">2) Настройки</div>
+  <div class="row">
+    <div class="col">
+      <label>Страна назначения</label>
+      <select id="country"></select>
+    </div>
+    <div class="col">
+      <label>Язык перевода</label>
+      <select id="lang"></select>
+      <input type="text" id="langCustom" placeholder="Код или название языка (опционально)" />
+    </div>
+    <div class="col">
+      <label>Валюта</label>
+      <input type="text" id="currency" placeholder="Например: USD" />
+    </div>
+  </div>
+
+  <div class="row" style="margin-top:10px;">
+    <div class="col">
+      <label class="check">
+        <input type="checkbox" id="rtl" />
+        RTL (арабский/иврит)
+      </label>
+    </div>
+  </div>
+
+  <div class="hr"></div>
+
+  <div class="section-title">3) Замены в тексте</div>
+  <div class="row">
+    <div class="col">
+      <label>Бренд: было</label>
+      <input type="text" id="fromBrand" value="Garnier" />
+    </div>
+    <div class="col">
+      <label>Бренд: стало</label>
+      <input type="text" id="toBrand" value="Garnier" />
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col">
+      <label>Страна: было</label>
+      <input type="text" id="fromCountry" value="Italy" />
+    </div>
+    <div class="col">
+      <label>Страна: стало</label>
+      <input type="text" id="toCountry" value="Saudi Arabia" />
+    </div>
+    <div class="col">
+      <label>Валюта: было</label>
+      <input type="text" id="fromCurrency" value="EUR" />
+    </div>
+  </div>
+
+  <div class="actions">
+    <button class="btn" id="goZip">📦 Перевести архив</button>
+    <a class="btn secondary" id="downloadZip" style="display:none;" href="#">Скачать архив</a>
+  </div>
+
+  <pre id="statusZip"></pre>
+</div></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+    <script type="module" src="/assets/app.js"></script>
+  </div>
+</body>
+</html>

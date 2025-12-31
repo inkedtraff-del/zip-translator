@@ -1,0 +1,18 @@
+{
+  "name": "inked-translator-pro-3000",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "openai": "^4.0.0",
+    "node-html-parser": "6.1.13",
+    "@babel/parser": "^7.26.0",
+    "@babel/traverse": "^7.26.0",
+    "@babel/generator": "^7.26.0"
+  },
+  "scripts": {
+    "build": "node -e \"console.log('no build');\""
+  },
+  "engines": {
+    "node": "24.x"
+  }
+}
