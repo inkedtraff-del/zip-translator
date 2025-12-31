@@ -2,23 +2,23 @@
 <html lang="ru">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>INKED TRANSLATOR PRO 3000</title>
   <style>
     :root{
       --bg1:#0b1020;
       --bg2:#141a33;
-      --card: rgba(255,255,255,.07);
-      --stroke: rgba(255,255,255,.14);
-      --text: rgba(255,255,255,.92);
-      --muted: rgba(255,255,255,.68);
+      --card:rgba(255,255,255,.07);
+      --stroke:rgba(255,255,255,.14);
+      --text:rgba(255,255,255,.92);
+      --muted:rgba(255,255,255,.68);
       --accent:#7c5cff;
       --accent2:#00d4ff;
     }
-    *{ box-sizing:border-box; }
+    *{box-sizing:border-box}
     body{
       margin:0;
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
       color:var(--text);
       background:
         radial-gradient(1200px 600px at 15% 10%, rgba(124,92,255,.30), transparent 55%),
@@ -27,167 +27,188 @@
       min-height:100vh;
       padding:44px 18px;
     }
-    .wrap{ max-width:1020px; margin:0 auto; }
-    .top{ display:flex; justify-content:space-between; align-items:flex-start; gap:16px; flex-wrap:wrap; margin-bottom:18px; }
-    h1{ font-size:28px; margin:0; letter-spacing:.2px; }
-    .sub{ margin-top:8px; color:var(--muted); max-width:760px; line-height:1.45; }
+    .wrap{max-width:1020px;margin:0 auto}
+    h1{margin:0 0 8px;font-size:34px;letter-spacing:.5px}
+    .sub{margin:0 0 22px;color:var(--muted)}
     .card{
       background:var(--card);
       border:1px solid var(--stroke);
       border-radius:18px;
       padding:18px;
-      box-shadow: 0 20px 60px rgba(0,0,0,.25);
       backdrop-filter: blur(10px);
+      box-shadow: 0 18px 40px rgba(0,0,0,.22);
     }
-    .section-title{ font-size:14px; margin:0 0 10px; color: rgba(255,255,255,.88); }
-    .row{ display:flex; gap:12px; flex-wrap:wrap; }
-    .col{ flex:1; min-width:240px; }
-    label{ display:block; font-size:12px; color:var(--muted); margin:10px 0 6px; }
-    select, input[type="text"]{
+    .sectionTitle{font-weight:800;margin:0 0 10px}
+    .hr{height:1px;background:rgba(255,255,255,.10);margin:16px 0}
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap:12px;
+    }
+    @media (max-width: 900px){
+      .grid{grid-template-columns:1fr}
+    }
+    .field label{
+      display:block;
+      font-size:13px;
+      color:var(--muted);
+      margin:0 0 6px;
+    }
+    input, select{
       width:100%;
       padding:12px 12px;
-      border-radius:12px;
-      background:rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.14);
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.18);
+      background:rgba(0,0,0,.18);
       color:var(--text);
       outline:none;
     }
-    select:focus, input[type="text"]:focus{
-      border-color: rgba(124,92,255,.55);
-      box-shadow: 0 0 0 3px rgba(124,92,255,.20);
-    }
-    .hint{ font-size:12px; color:var(--muted); margin-top:6px; line-height:1.35; }
-    .filebox{
-      border:1px dashed rgba(255,255,255,.26);
-      background:rgba(255,255,255,.04);
+    input::placeholder{color:rgba(255,255,255,.45)}
+    .row{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding:12px;
+      border:1px dashed rgba(255,255,255,.22);
       border-radius:14px;
-      padding:14px;
-      display:flex; align-items:center; justify-content:space-between; gap:12px;
+      background:rgba(0,0,0,.10);
     }
-    .filebox strong{ font-size:13px; }
-    .filebox .name{ color:var(--muted); font-size:12px; margin-top:4px; }
-    .hr{ height:1px; background:rgba(255,255,255,.10); margin:16px 0; }
-    .actions{ display:flex; gap:12px; flex-wrap:wrap; margin-top:14px; align-items:center; }
-    .btn{
-      display:inline-flex; align-items:center; justify-content:center; gap:10px;
+    .rowLeft{display:flex;flex-direction:column;gap:4px}
+    .rowTitle{font-weight:800}
+    .rowHint{color:var(--muted);font-size:13px}
+    .btns{display:flex;gap:12px;flex-wrap:wrap;margin-top:10px}
+    button, a.btn{
+      border:none;
+      cursor:pointer;
       padding:12px 16px;
       border-radius:14px;
-      border:1px solid rgba(255,255,255,.16);
-      cursor:pointer;
       font-weight:800;
-      color:rgba(255,255,255,.92);
-      background: linear-gradient(135deg, rgba(124,92,255,.95), rgba(0,212,255,.70));
-      user-select:none;
       text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      user-select:none;
     }
-    .btn.secondary{
-      background:rgba(255,255,255,.06);
-      font-weight:700;
+    #goZip{
+      background:linear-gradient(180deg, rgba(124,92,255,.95), rgba(124,92,255,.65));
+      color:white;
+      box-shadow:0 12px 26px rgba(124,92,255,.22);
     }
-    .pill{ display:inline-flex; gap:10px; align-items:center; padding:10px 12px; border-radius:14px;
-      background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.12); color:var(--muted); font-size:12px; }
-    .pill input{ width:16px; height:16px; }
-    pre{
-      margin:14px 0 0;
-      padding:12px 12px;
-      border-radius:14px;
-      background:rgba(0,0,0,.25);
+    #downloadZip{
+      display:none;
+      background:#25D366;
+      color:#0b1a12;
+      font-weight:900;
       border:1px solid rgba(255,255,255,.10);
-      color: rgba(255,255,255,.86);
-      overflow:auto;
-      min-height:48px;
-      white-space:pre-wrap;
+      box-shadow:0 10px 28px rgba(37,211,102,.25);
+      animation: waPulse 1.6s ease-in-out infinite;
+      transition:transform .15s ease, filter .15s ease;
     }
-    .grid{ display:grid; grid-template-columns: 1fr; gap:16px; }
+    #downloadZip:hover{transform:translateY(-1px) scale(1.02); filter:brightness(1.05)}
+    @keyframes waPulse{
+      0%   { box-shadow:0 0 0 0 rgba(37,211,102,.55), 0 10px 28px rgba(37,211,102,.20); }
+      70%  { box-shadow:0 0 0 14px rgba(37,211,102,0), 0 10px 28px rgba(37,211,102,.20); }
+      100% { box-shadow:0 0 0 0 rgba(37,211,102,0), 0 10px 28px rgba(37,211,102,.20); }
+    }
+    .status{
+      margin-top:14px;
+      white-space:pre-line;
+      color:rgba(255,255,255,.85);
+      padding:14px;
+      border-radius:14px;
+      background:rgba(0,0,0,.14);
+      border:1px solid rgba(255,255,255,.10);
+      min-height:56px;
+    }
+    .small{font-size:13px;color:var(--muted)}
+    .checkboxRow{display:flex;align-items:center;gap:10px;margin-top:10px}
   </style>
 </head>
+
 <body>
-  <div class="wrap">
-    <div class="top">
-      <div>
-        <h1>INKED TRANSLATOR PRO 3000</h1>
-        <div class="sub">Загрузи ZIP с проектом, выбери язык и скачай архив с переводом.</div>
+<div class="wrap">
+  <h1>INKED TRANSLATOR PRO 3000</h1>
+  <p class="sub">Загрузи ZIP с проектом, выбери язык и скачай архив с переводом.</p>
+
+  <div class="card">
+    <div class="sectionTitle">1) Архив</div>
+
+    <div class="row">
+      <div class="rowLeft">
+        <div class="rowTitle">Выбери ZIP</div>
+        <div id="zipName" class="rowHint">Архив не выбран</div>
+      </div>
+      <input id="zip" type="file" accept=".zip" />
+    </div>
+
+    <div style="height:12px"></div>
+
+    <div class="grid">
+      <div class="field">
+        <label>Название архива (для скачивания)</label>
+        <input id="outName" type="text" placeholder="Например: lander_ar" />
+        <div class="small">Если пусто — имя будет как раньше (оригинал + язык).</div>
       </div>
     </div>
 
+    <div class="hr"></div>
+
+    <div class="sectionTitle">2) Настройки</div>
     <div class="grid">
-      <div class="card">
-  <div class="section-title">1) Архив</div>
-  <div class="filebox">
-    <div>
-      <strong>Выбери ZIP</strong>
-      <div class="name" id="zipName">Архив не выбран</div>
+      <div class="field">
+        <label>Страна назначения</label>
+        <select id="country"></select>
+      </div>
+
+      <div class="field">
+        <label>Язык перевода</label>
+        <select id="lang"></select>
+      </div>
     </div>
-    <input type="file" id="zip" accept=".zip" />
+
+    <div class="checkboxRow">
+      <input id="rtl" type="checkbox" />
+      <label for="rtl">RTL (арабский/иврит)</label>
+    </div>
+
+    <div class="hr"></div>
+
+    <div class="sectionTitle">3) Замены в тексте</div>
+    <div class="grid">
+      <div class="field">
+        <label>Бренд: было</label>
+        <input id="fromBrand" type="text" placeholder="KIKO MILANO" />
+      </div>
+      <div class="field">
+        <label>Бренд: стало</label>
+        <input id="toBrand" type="text" placeholder="SOSI HOOY" />
+      </div>
+      <div class="field">
+        <label>Страна: было</label>
+        <input id="fromCountry" type="text" placeholder="Italy" />
+      </div>
+      <div class="field">
+        <label>Страна: стало</label>
+        <input id="toCountry" type="text" placeholder="Saudi Arabia" />
+      </div>
+    </div>
+
+    <div class="btns">
+      <button id="goZip">Перевести архив</button>
+      <a id="downloadZip" class="btn" href="#">Скачать архив</a>
+    </div>
+
+    <div id="statusZip" class="status">—</div>
   </div>
 
-  <div class="hr"></div>
+  <p class="small" style="margin-top:14px">
+    Поддерживает перевод HTML + безопасный перевод текста в JS (только UI-строки).
+  </p>
 
-  <div class="section-title">2) Настройки</div>
-  <div class="row">
-    <div class="col">
-      <label>Страна назначения</label>
-      <select id="country"></select>
-    </div>
-    <div class="col">
-      <label>Язык перевода</label>
-      <select id="lang"></select>
-      <input type="text" id="langCustom" placeholder="Код или название языка (опционально)" />
-    </div>
-    <div class="col">
-      <label>Валюта</label>
-      <input type="text" id="currency" placeholder="Например: USD" />
-    </div>
-  </div>
-
-  <div class="row" style="margin-top:10px;">
-    <div class="col">
-      <label class="check">
-        <input type="checkbox" id="rtl" />
-        RTL (арабский/иврит)
-      </label>
-    </div>
-  </div>
-
-  <div class="hr"></div>
-
-  <div class="section-title">3) Замены в тексте</div>
-  <div class="row">
-    <div class="col">
-      <label>Бренд: было</label>
-      <input type="text" id="fromBrand" value="Garnier" />
-    </div>
-    <div class="col">
-      <label>Бренд: стало</label>
-      <input type="text" id="toBrand" value="Garnier" />
-    </div>
-  </div>
-
-  <div class="row">
-    <div class="col">
-      <label>Страна: было</label>
-      <input type="text" id="fromCountry" value="Italy" />
-    </div>
-    <div class="col">
-      <label>Страна: стало</label>
-      <input type="text" id="toCountry" value="Saudi Arabia" />
-    </div>
-    <div class="col">
-      <label>Валюта: было</label>
-      <input type="text" id="fromCurrency" value="EUR" />
-    </div>
-  </div>
-
-  <div class="actions">
-    <button class="btn" id="goZip">📦 Перевести архив</button>
-    <a class="btn secondary" id="downloadZip" style="display:none;" href="#">Скачать архив</a>
-  </div>
-
-  <pre id="statusZip"></pre>
-</div></div>
-
-    <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
-    <script type="module" src="/assets/app.js"></script>
-  </div>
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+  <script type="module" src="/assets/app.js"></script>
+</div>
 </body>
 </html>
